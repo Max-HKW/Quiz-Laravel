@@ -1,7 +1,7 @@
 @extends('layout')
 
 @section('content')
-    <h1>Quiz sui Paesi del Mondo</h1>
+    {{-- <h1>Quiz sui Paesi del Mondo</h1> --}}
 
     <h2>Scegli una modalità:</h2>
 

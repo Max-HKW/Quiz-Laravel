@@ -12,6 +12,6 @@
 
 
 
-    <a href="{{ route('home')}}">Home</a>
     <a href="{{ route('quiz.training', ['type' => $type]) }}">Prossima</a>
+    <a href="{{ route('home')}}">Home</a>
 @endsection

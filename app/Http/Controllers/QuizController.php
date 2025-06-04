@@ -165,5 +165,14 @@ public function submitAnswer(Request $request, $type)
     return redirect()->route('quiz.game.question', ['type' => $type]);
 }
 
+public function showResult($type)
+{
+    $answers = session('answers', []);
+    $score = session('score', 0);
+    $totalQuestions = count(session('questions', []));
+
+    return view('quiz.result', compact('answers', 'score', 'totalQuestions', 'type'));
+}
+
     
 }
