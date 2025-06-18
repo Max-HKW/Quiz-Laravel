@@ -94,16 +94,13 @@ public function nextQuestion($type)
         return redirect()->route('quiz.game.result', ['type' => $type]);
     }
 
-    $country = $questions[$index];
-    $correctAnswer = $type === 'capital' ? $country->capital : $country->name;
+    $country = $questions[$index]; // quello da indovinare
+    $correctAnswer = $type === 'capital' ? $country->capital : $country->alpha2Code; // cambiamo qui
 
     // Numero di opzioni in base a difficoltà
-    $numOptions = 3; // facile
-    if ($difficulty === 'medium') {
-        $numOptions = 4;
-    } elseif ($difficulty === 'hard') {
-        $numOptions = 5;
-    }
+    $numOptions = 3;
+    if ($difficulty === 'medium') $numOptions = 4;
+    elseif ($difficulty === 'hard') $numOptions = 5;
 
     if ($type === 'capital') {
         $options = Country::where('capital', '!=', $correctAnswer)
@@ -111,21 +108,27 @@ public function nextQuestion($type)
             ->limit($numOptions - 1)
             ->pluck('capital')
             ->toArray();
+
+        $options[] = $correctAnswer;
+        shuffle($options);
     } else {
-        $options = Country::where('name', '!=', $correctAnswer)
+        // Domanda: Qual è la bandiera dello stato X?
+        // Opzioni: array di oggetti Country con alpha2Code diversi
+        $options = Country::where('alpha2Code', '!=', $country->alpha2Code)
             ->inRandomOrder()
             ->limit($numOptions - 1)
-            ->pluck('name')
-            ->toArray();
-    }
+            ->get();
 
-    $options[] = $correctAnswer;
-    shuffle($options);
+        // Aggiungi l'opzione corretta (il paese da indovinare)
+        $options->push($country);
+        $options = $options->shuffle();
+    }
 
     $totalQuestions = count($questions);
 
     return view('quiz.game_question', compact('country', 'type', 'options', 'index', 'totalQuestions'));
 }
+
 
 
 
@@ -138,10 +141,10 @@ public function submitAnswer(Request $request, $type)
     $answers = session('answers');
 
     $country = $questions[$index];
-    $correct = ($type === 'capital') ? $country->capital : $country->name;
+    $correct = ($type === 'capital') ? $country->capital : $country->alpha2Code;
+
 
     $userAnswer = $request->input('answer');
-
     $isCorrect = $userAnswer === $correct;
     if ($isCorrect) {
         $score += 1;
